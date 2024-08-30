@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Recipe Finder</h1>
+    <form id="recipe-form">
+        <label for="ingredients">Enter ingredients (comma-separated):</label>
+        <input type="text" id="ingredients" name="ingredients" required>
+        <button type="submit">Get Recipes</button>
+    </form>
+
+    <h2>Recipes:</h2>
+    <ul id="recipe-list"></ul>
+
+    <script>
+        document.getElementById('recipe-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const ingredients = document.getElementById('ingredients').value;
+        fetch('/get_recipes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `ingredients=${encodeURIComponent(ingredients)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const recipeList = document.getElementById('recipe-list');
+            recipeList.innerHTML = '';
+
+            data.forEach(recipe => {
+                const listItem = document.createElement('li');
+
+                const title = document.createElement('h3');
+                title.textContent = recipe.title;
+                listItem.appendChild(title);
+
+                const image = document.createElement('img');
+                image.src = recipe.image;
+                image.alt = recipe.title;
+                listItem.appendChild(image);
+
+                const instructions = document.createElement('div');
+                instructions.innerHTML = recipe.instructions || 'No instructions provided.';
+                listItem.appendChild(instructions);
+                recipeList.appendChild(listItem);
+            });
+        });
+    });
+    </script>
+</body>
+</html>
